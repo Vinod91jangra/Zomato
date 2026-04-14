@@ -31,6 +31,7 @@ const login = () => {
             onError: responseGoogle,
             flow: "auth-code",
         })
+        
   return (
     <div className='flex min-h-screen items center justify-center bg-white px-4'>
       <div className='w-full max-w-sm space-y-6'>
