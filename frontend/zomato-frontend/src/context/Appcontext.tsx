@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import { authService } from "../main";
 import axios from "axios";
 import type { LocationData, AppContextType, User } from "../types";
+import { Toaster } from "react-hot-toast";
 
 
 
@@ -52,35 +53,60 @@ useEffect(() =>{
 },[])
 
 useEffect(() =>{
-    if(!navigator.geolocation){ return alert("Please allow Location to continue");}
+    if(!navigator.geolocation)
+      return  alert("Geolocation is not supported by your browser.");
     setLoadinglocation(true);
 
-    navigator.geolocation.getCurrentPosition(async (position)=>{
+    navigator.geolocation.getCurrentPosition(
+        async (position) => {
+            const { latitude, longitude } = position.coords;
+            try {
+                // Use a free geocoding service that works with CORS
+                const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`);
+                const data = await res.json();
 
-        const {latitude,longitude} = position.coords;
-        try {
-           
-            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
-            const data = await res.json();
+                setLocation({
+                    latitude,
+                    longitude,
+                    formattedAddress: data.city || data.locality || data.localityInfo?.administrative?.[2]?.name || "current location",
+                });
+                setCity(
+                    data.city ||
+                    data.locality ||
+                    data.localityInfo?.administrative?.[2]?.name ||
+                    "Your location"
+                );
+                setLoadinglocation(false);
+            } catch (error) {
+                console.error("BigDataCloud failed, trying fallback...");
+                try {
+                    // Fallback to ipapi.co for basic location info
+                    const fallbackRes = await fetch('https://ipapi.co/json/');
+                    const fallbackData = await fallbackRes.json();
 
-            setLocation({
-                latitude,
-                longitude,
-                formattedAddress: data.display_name || "current location"
-            })
-            setCity(
-                data.address.city ||
-                 data.address.town ||
-                  data.address.village 
-                  || "Your location"
-            )
-        } catch (error) {
-            setLoadinglocation(false);
-        }
-    });
+                    setLocation({
+                        latitude,
+                        longitude,
+                        formattedAddress: `${fallbackData.city}, ${fallbackData.region}`,
+                    });
+                    setCity(fallbackData.city || "Your location");
+                    setLoadinglocation(false);
+                } catch (fallbackError) {
+                    setLocation({
+                        latitude,
+                        longitude,
+                        formattedAddress: "current location",
+                    });
+                    setCity("Failed to Load");
+                    setLoadinglocation(false);
+                    console.error("Location reverse-geocode error:", error, fallbackError);
+                }
+            }
 });
+}, []);
 return <AppContext.Provider value = {{isAuth,loading,setIsAuth,setLoading,setUser,user,location,city,loadinglocation}}>
     {children}
+    <Toaster/>
     </AppContext.Provider>
 }
 

@@ -6,5 +6,5 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.uploadFile = void 0;
 const multer_1 = __importDefault(require("multer"));
 const storage = multer_1.default.memoryStorage();
-exports.uploadFile = (0, multer_1.default)({ storage }).single("file");
+exports.uploadFile = (0, multer_1.default)({ storage }).single("image");
 exports.default = exports.uploadFile;

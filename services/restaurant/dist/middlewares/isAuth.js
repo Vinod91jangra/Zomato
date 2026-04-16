@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isAuth = void 0;
+exports.isSeller = exports.isAuth = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const isAuth = async (req, res, next) => {
     try {
@@ -39,3 +39,14 @@ const isAuth = async (req, res, next) => {
     }
 };
 exports.isAuth = isAuth;
+const isSeller = async (req, res, next) => {
+    const user = req.user;
+    if (user?.role !== "seller") {
+        res.status(401).json({
+            message: "Access Denied - Sellers Only"
+        });
+        return;
+    }
+    next();
+};
+exports.isSeller = isSeller;

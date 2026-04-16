@@ -1,6 +1,6 @@
-import mongoose, { Schema } from "mongoose"
+import mongoose, { Document, Schema } from "mongoose"
 
-export interface IRestaurant extends mongoose.Document{ 
+export interface IRestaurant extends Document{ 
 
 name:string;
 description?:string;
@@ -22,6 +22,10 @@ const schema = new Schema<IRestaurant>({
     name:{
         type:String,
         required:true,
+        trim:true,
+    },
+    description:{
+        type:String,
         trim:true,
     },
     image:{

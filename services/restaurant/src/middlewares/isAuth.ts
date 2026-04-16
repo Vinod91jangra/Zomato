@@ -8,6 +8,7 @@ export interface IUser {
     email:string;
     image:string;
     role: string;
+    restaurantId?: string;
 }
 
 
@@ -53,4 +54,17 @@ Promise<void> => {
             message:"Invalid or expired token"
         })
     }
+}
+
+export const isSeller = async(req:AuthenticatedRequest,res:Response,next:NextFunction):
+Promise<void> => {  
+
+    const user= req.user;
+    if(user?.role !== "seller"){
+        res.status(401).json({
+            message:"Access Denied - Sellers Only"
+        })
+        return;
+    }
+    next();
 }
