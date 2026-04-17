@@ -77,7 +77,8 @@ const AddRestaurant = ({ fetchMyRestaurant }: props) => {
                 onChange={(e) => setDescription(e.target.value)}
              className="w-full rounder-lg border px-4 py-2 text-sm outline-none" />
 
-             <label><BiUpload className="h-5 w-5 text-red-500"></BiUpload>
+             <label className="flex cursor-pointer items-center gap-3 rounded-lg border p-4 text-sm text-gray-600 hover:bg-gray-500">
+                <BiUpload className="h-5 w-5 text-red-500"></BiUpload>
              { image? image.name : "Upload Restaurant Image"}
              <input type="file" 
              accept="image/*" 

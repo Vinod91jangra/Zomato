@@ -39,7 +39,7 @@ const login = () => {
   return (
     <div className='flex min-h-screen items center justify-center bg-white px-4'>
       <div className='w-full max-w-sm space-y-6'>
-        <h1 className='text -center text-3xl font-bold text-[#E23774]'>Tomato</h1>
+        <h1 className='text -center text-3xl font-bold text-[#E23774]'>Zomato</h1>
         <p>Login or Sign up to continue</p>
         <button onClick={googleLogin} disabled= {loading} className='flex w-full items-center justify-center 
         gap-3 rounded-xl border border-grey-300 bg-white px- 4 py-3'><FcGoogle size={20}/>

@@ -52,57 +52,49 @@ useEffect(() =>{
     fetchUser();
 },[])
 
-useEffect(() =>{
-    if(!navigator.geolocation)
-      return  alert("Geolocation is not supported by your browser.");
-    setLoadinglocation(true);
+useEffect(() => {
+  if (!navigator.geolocation) {
+    alert("Please Allow Location Access");
+    return;
+  }
 
-    navigator.geolocation.getCurrentPosition(
-        async (position) => {
-            const { latitude, longitude } = position.coords;
-            try {
-                // Use a free geocoding service that works with CORS
-                const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`);
-                const data = await res.json();
+  navigator.geolocation.getCurrentPosition(
+    async (position) => {
+      const { latitude, longitude } = position.coords;
 
-                setLocation({
-                    latitude,
-                    longitude,
-                    formattedAddress: data.city || data.locality || data.localityInfo?.administrative?.[2]?.name || "current location",
-                });
-                setCity(
-                    data.city ||
-                    data.locality ||
-                    data.localityInfo?.administrative?.[2]?.name ||
-                    "Your location"
-                );
-                setLoadinglocation(false);
-            } catch (error) {
-                console.error("BigDataCloud failed, trying fallback...");
-                try {
-                    // Fallback to ipapi.co for basic location info
-                    const fallbackRes = await fetch('https://ipapi.co/json/');
-                    const fallbackData = await fallbackRes.json();
+      try {
+        const res = await fetch(
+          `http://localhost:5001/api/location?lat=${latitude}&lon=${longitude}`
+        );
 
-                    setLocation({
-                        latitude,
-                        longitude,
-                        formattedAddress: `${fallbackData.city}, ${fallbackData.region}`,
-                    });
-                    setCity(fallbackData.city || "Your location");
-                    setLoadinglocation(false);
-                } catch (fallbackError) {
-                    setLocation({
-                        latitude,
-                        longitude,
-                        formattedAddress: "current location",
-                    });
-                    setCity("Failed to Load");
-                    setLoadinglocation(false);
-                    console.error("Location reverse-geocode error:", error, fallbackError);
-                }
-            }
-});
+        const data = await res.json();
+
+        setLocation({
+          latitude,
+          longitude,
+          formattedAddress: data?.display_name || "Current Location",
+        });
+
+        setCity(
+          data?.address?.city ||
+            data?.address?.town ||
+            data?.address?.village ||
+            "Your Location"
+        );
+      } catch (error) {
+        setLocation({
+          latitude,
+          longitude,
+          formattedAddress: "Current Location",
+        });
+
+        setCity("Your Location");
+      }
+    },
+    () => {
+      alert("Location permission denied");
+    }
+  );
 }, []);
 return <AppContext.Provider value = {{isAuth,loading,setIsAuth,setLoading,setUser,user,location,city,loadinglocation}}>
     {children}

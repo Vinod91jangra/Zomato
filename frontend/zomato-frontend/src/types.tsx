@@ -49,4 +49,16 @@ autoLocation: {
 };
 isOpen: boolean;
 createdAt: Date;
+distanceKm?: number;
+}
+export interface IMenuItem {
+    _id:string;
+    restaurantId: string;
+    name: string;
+    description: string;
+    price: number;
+    image?: string;
+    isAvailable:boolean;
+    updatedAt: Date;
+    createdAt: Date;
 }

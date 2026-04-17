@@ -1,19 +1,28 @@
 import { useEffect, useState } from "react";
-import type { IRestaurant } from "../types";
+import type { IMenuItem, IRestaurant } from "../types";
 import { restaurantService } from "../main";
 import axios from "axios";
 
 import AddRestaurant from "./AddRestaurant";
 import RestaurantProfile from "../components/RestaurantProfile";
+import MenuItems from "../components/MenuItems";
+import AddMenuItem from "../components/AddMenuItem";
+
+
+
+ 
 
 type SellerTab = "menu" | "add-item" | "sales";
 export const Restaurant = () => {
+     
     const [restaurant, setRestaurant] = useState<IRestaurant | null>(null);
     const [loading, setLoading] = useState(true);
     const [Tab, setTab] = useState<SellerTab>("menu");
 
-      
+    
     const fetchMyRestaurant = async () => {
+
+        
         try {
             const response = await axios.get(
                 `${restaurantService}/api/restaurant/my`,
@@ -41,6 +50,29 @@ export const Restaurant = () => {
         fetchMyRestaurant();
     }, []);
 
+    const [menuItems, setMenuItems] = useState<IMenuItem[]>([]);
+
+    const fetchMenuItems = async(restaurantId:string)=>{
+        try {
+            const {data} = await axios.get(`${restaurantService}/api/item/all/${restaurantId}`,
+                {
+                    headers:{
+                        Authorization: `Bearer ${localStorage.getItem("token")}`
+                    }
+                }
+            );
+            setMenuItems(data.items);
+            
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+       useEffect(()=>{
+            if(restaurant?._id){
+                fetchMenuItems(restaurant._id)
+            }
+         },[restaurant])
     if (loading) {
         return (
             <div className="flex min-h-screen items-center justify-center">
@@ -48,13 +80,16 @@ export const Restaurant = () => {
             </div>
         );
     }
-
-    if (!restaurant) {
+    
+    if (!restaurant  ) {
         return <AddRestaurant  fetchMyRestaurant={fetchMyRestaurant}/>;
     }
+    
 
-    return (
+        return ( <div>
+       
         <div className="flex flex-col">
+     
             <RestaurantProfile restaurant={restaurant} isSeller={true} onUpdate={setRestaurant}/>
     <div className="flex border-b rounded-t-2xl shadow-sm  mx-3 my-3 ">
            {
@@ -73,12 +108,19 @@ export const Restaurant = () => {
            }
     </div>
     <div className="p-5 rounded-b-2xl ml-3  mr-3 shadow-sm">
-        {Tab === "menu" && <p>Menu Page</p>}
-        {Tab === "add-item" && <p>Add Item Page</p>}
+        {Tab === "menu" && <MenuItems 
+                            items={menuItems} 
+                            onItemDeleted= {() => fetchMenuItems(restaurant._id)}
+                            isSeller = {true} />}
+        {Tab === "add-item" &&  <AddMenuItem onItemAdded={() =>fetchMenuItems(restaurant._id)}/>}
         {Tab === "sales" && <p>Sales Report Page</p>}
     </div>
         </div>
+    </div>
+        
     );
+       
+    
 };
 
 export default Restaurant;

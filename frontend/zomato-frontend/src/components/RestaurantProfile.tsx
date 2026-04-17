@@ -6,6 +6,7 @@ import axios from "axios";
 import { restaurantService } from "../main";
 import toast from "react-hot-toast";
 import { BiEdit, BiSave,BiMapPin } from "react-icons/bi";
+import { useAppData } from "../context/Appcontext";
 
 interface props{
     restaurant: IRestaurant;
@@ -19,8 +20,9 @@ const RestaurantProfile = ({restaurant,isSeller,onUpdate}: props)=>{
     const [description, setDescription] = useState(restaurant.description);
     const [isOpen, setIsOpen] = useState(restaurant.isOpen);
     const[loading, setLoading] = useState(false);
+    const{location} = useAppData();
     
-
+console.log(location?.formattedAddress);
     const toggleOpenStatus = async()=>{
         try{
             const {data} = await axios.put(`${restaurantService}/api/restaurant/status`,
@@ -64,6 +66,7 @@ const RestaurantProfile = ({restaurant,isSeller,onUpdate}: props)=>{
             setLoading(false);
         }
     }
+
     return (
         <div className="mx-auto max-w-xl rounded-xl bg-white shadow-sm overflow-hidden"> 
          {
@@ -84,7 +87,7 @@ const RestaurantProfile = ({restaurant,isSeller,onUpdate}: props)=>{
                 }
                 <div  className="mt-1 flex items-center gap-2 text-sm text-gray-500">
                     <BiMapPin className="h-4 w-4 text-red-500"/>
-                    {restaurant.autoLocation?.formattedAddress || "Location not available"}
+                    {location?.formattedAddress || "Location not available"}
                 </div>
               </div>
               <button onClick={() => setEditMode(!editMode)} className="text-gray-500 text-black">
