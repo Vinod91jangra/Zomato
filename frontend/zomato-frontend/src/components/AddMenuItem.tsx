@@ -62,8 +62,10 @@ const AddMenuItem = ({onItemAdded}:{onItemAdded:() => void}) => {
            <input type='number' placeholder='price ₹' value={price} onChange={e=>setPrice(e.target.value)}
          className='w-full rounded-lg border px-4 py-2 text-sm outline-none'/>
 
-         <label className="flex cursor-pointer items-center gap-3 rounded-lg border p-4 text-sm text-gray-600 hover:bg-gray-500"><BiUpload className="h-5 w-5 text-red-500"></BiUpload>
-                      { image? image.name : "Upload Restaurant Image"}
+         <label className="flex cursor-pointer items-center gap-3 rounded-lg
+          border p-4 text-sm text-gray-600 hover:bg-gray-500">
+          <BiUpload className="h-5 w-5 text-red-500"></BiUpload>
+                      { image? image.name : "Upload Item Image"}
                       <input type="file" 
                       accept="image/*" 
                       onChange={(e) => setImage(e.target.files ? e.target.files[0] : null)} 

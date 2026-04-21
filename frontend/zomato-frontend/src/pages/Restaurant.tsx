@@ -7,6 +7,7 @@ import AddRestaurant from "./AddRestaurant";
 import RestaurantProfile from "../components/RestaurantProfile";
 import MenuItems from "../components/MenuItems";
 import AddMenuItem from "../components/AddMenuItem";
+import RestaurantOrders from "../components/RestaurantOrders";
 
 
 
@@ -89,8 +90,9 @@ export const Restaurant = () => {
         return ( <div>
        
         <div className="flex flex-col">
-     
+               
             <RestaurantProfile restaurant={restaurant} isSeller={true} onUpdate={setRestaurant}/>
+             <RestaurantOrders restaurantId={restaurant._id} />
     <div className="flex border-b rounded-t-2xl shadow-sm  mx-3 my-3 ">
            {
             [
@@ -113,7 +115,7 @@ export const Restaurant = () => {
                             onItemDeleted= {() => fetchMenuItems(restaurant._id)}
                             isSeller = {true} />}
         {Tab === "add-item" &&  <AddMenuItem onItemAdded={() =>fetchMenuItems(restaurant._id)}/>}
-        {Tab === "sales" && <p>Sales Report Page</p>}
+        {Tab === "sales" && <p>Sales Report </p>}
     </div>
         </div>
     </div>

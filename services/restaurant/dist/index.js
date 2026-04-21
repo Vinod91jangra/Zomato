@@ -1,23 +1,32 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
+import express from "express";
+import connectDB from "./config/db.js";
+import dotenv from "dotenv";
+import restaurantRoutes from "./routes/restaurant.js";
+import cors from "cors";
+import itemRoutes from "./routes/menuItem.js";
+import fetch from "node-fetch"; // 
+import cartRoutes from "./routes/CartItem.js";
+import addressRoute from "./routes/Address.js";
+import orderRoutes from "./routes/Order.js";
+import { connectRabbitMQ } from "./config/rabbitmq.js";
+import { startPaymentConsumer } from "./config/payment.consumer.js";
+dotenv.config();
+const startServer = async () => {
+    await connectRabbitMQ();
+    startPaymentConsumer();
+    // start express server here also
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const db_js_1 = __importDefault(require("./config/db.js"));
-const dotenv_1 = __importDefault(require("dotenv"));
-const restaurant_js_1 = __importDefault(require("./routes/restaurant.js"));
-const cors_1 = __importDefault(require("cors"));
-const menuItem_js_1 = __importDefault(require("./routes/menuItem.js"));
-const node_fetch_1 = __importDefault(require("node-fetch")); // ✅ important if Node < 18
-dotenv_1.default.config();
-const app = (0, express_1.default)();
-app.use((0, cors_1.default)());
-app.use(express_1.default.json());
+startServer();
+const app = express();
+app.use(cors());
+app.use(express.json());
 const PORT = process.env.PORT || 5001;
 // ✅ Routes
-app.use("/api/restaurant", restaurant_js_1.default);
-app.use("/api/item", menuItem_js_1.default);
+app.use("/api/restaurant", restaurantRoutes);
+app.use("/api/item", itemRoutes);
+app.use("/api/cart", cartRoutes);
+app.use("/api/address", addressRoute);
+app.use("/api/order", orderRoutes);
 // ✅ Simple in-memory cache
 const cache = {};
 // ✅ Location API (Fixed)
@@ -34,7 +43,7 @@ app.get("/api/location", async (req, res) => {
     try {
         // ✅ Rate limit protection (avoid 429)
         await new Promise((resolve) => setTimeout(resolve, 1000));
-        const response = await (0, node_fetch_1.default)(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`, {
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`, {
             headers: {
                 "User-Agent": "food-delivery-app", // ✅ required
             },
@@ -52,5 +61,5 @@ app.get("/api/location", async (req, res) => {
 // ✅ Server start
 app.listen(PORT, () => {
     console.log(`Restaurant service is running on port ${PORT}`);
-    (0, db_js_1.default)();
+    connectDB();
 });

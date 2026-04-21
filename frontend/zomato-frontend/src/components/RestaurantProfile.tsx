@@ -7,6 +7,7 @@ import { restaurantService } from "../main";
 import toast from "react-hot-toast";
 import { BiEdit, BiSave,BiMapPin } from "react-icons/bi";
 import { useAppData } from "../context/Appcontext";
+import { useNavigate } from "react-router-dom";
 
 interface props{
     restaurant: IRestaurant;
@@ -15,12 +16,15 @@ interface props{
 }
 
 const RestaurantProfile = ({restaurant,isSeller,onUpdate}: props)=>{
+   
     const [editMode, setEditMode] = useState(false);
     const [name, setName] = useState(restaurant.name);
     const [description, setDescription] = useState(restaurant.description);
     const [isOpen, setIsOpen] = useState(restaurant.isOpen);
     const[loading, setLoading] = useState(false);
-    const{location} = useAppData();
+    const{location,setUser,setIsAuth} = useAppData();
+    const navigate = useNavigate(); 
+   
     
 console.log(location?.formattedAddress);
     const toggleOpenStatus = async()=>{
@@ -96,6 +100,18 @@ console.log(location?.formattedAddress);
             </div>
                    }
             {
+                !isSeller && <div className="flex justify-between items-start" >
+                    <div>
+                        <h2 className="tetx=2xl font-bold ">{restaurant.name}</h2>
+                        <div  className="mt-1 flex items-center gap-2 text-sm text-gray-500">
+                    <BiMapPin className="h-4 w-4 text-red-500"/>
+                    {location?.formattedAddress || "Location not available"}
+                </div>
+                    </div>
+                    
+                </div>
+            }
+            {
                 editMode? (<textarea value = {description} onChange={e =>setDescription(e.target.value)}
                 className="w-full rounded border px-3 py-2 text-sm"/>):(
                     <p className="text-gray-600 text-sm">{restaurant.description || "No description added"}</p>
@@ -114,9 +130,9 @@ console.log(location?.formattedAddress);
                     </button>
                 }
                 {
-            isSeller && <button onClick = {toggleOpenStatus} 
+            isSeller && <button onClick = {toggleOpenStatus}  
             className={`rounded-lg px-4 py-1.5 text-sm font-medium text-white
-                ${isOpen ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"}`}  >
+                ${isOpen ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"} `}  >
                     {isOpen? "Close Restaurant" : "Open Restaurant"}</button>
                 }
             </div>
@@ -124,6 +140,16 @@ console.log(location?.formattedAddress);
            <p className="text-xs text-gray-400">Created on_
             { new Date(restaurant.createdAt).toLocaleDateString()}</p>
         </div>
+        <button  onClick={() => {
+            localStorage.setItem("token","");
+            setUser(null);
+            setIsAuth(false);
+            navigate("/login");
+
+            toast.success("Logged out successfully"); }} 
+            className=" w-full font-semibold text-sm px-5 py-2  mx-auto bg-red-500 hover:bg-red-600 text-white ">
+            Logout
+        </button>
         </div>
     )
 }

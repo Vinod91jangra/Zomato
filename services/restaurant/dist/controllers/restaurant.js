@@ -1,22 +1,16 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.fetchSingleRestaurant = exports.getNearbyRestaurant = exports.updateRestaurant = exports.updateStatusRestaurant = exports.fetchMyRestaurant = exports.addRestaurant = void 0;
-const axios_1 = __importDefault(require("axios"));
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const datauri_1 = __importDefault(require("../config/datauri"));
-const trycatch_1 = __importDefault(require("../middlewares/trycatch"));
-const Restaurant_1 = __importDefault(require("../model/Restaurant"));
-exports.addRestaurant = (0, trycatch_1.default)(async (req, res) => {
+import axios from "axios";
+import jwt from "jsonwebtoken";
+import getBuffer from "../config/datauri";
+import TryCatch from "../middlewares/trycatch";
+import Restaurant from "../model/Restaurant";
+export const addRestaurant = TryCatch(async (req, res) => {
     const user = req.user;
     if (!user) {
         return res.status(401).json({
             message: "Unauthorized"
         });
     }
-    const existingRestaurant = await Restaurant_1.default.findOne({ owner: user?._id });
+    const existingRestaurant = await Restaurant.findOne({ owner: user?._id });
     if (existingRestaurant) {
         return res.status(400).json({
             message: "You already have a restaurant"
@@ -34,16 +28,16 @@ exports.addRestaurant = (0, trycatch_1.default)(async (req, res) => {
             message: "Please give Image"
         });
     }
-    const fileBuffer = (0, datauri_1.default)(file);
+    const fileBuffer = getBuffer(file);
     if (!fileBuffer?.content) {
         return res.status(400).json({
             message: "Failed to create file buffer"
         });
     }
-    const { data: uploadResult } = await axios_1.default.post(`${process.env.UTILS_SERVICE}/api/upload`, {
+    const { data: uploadResult } = await axios.post(`${process.env.UTILS_SERVICE}/api/upload`, {
         buffer: fileBuffer.content,
     });
-    const restaurant = await Restaurant_1.default.create({
+    const restaurant = await Restaurant.create({
         name,
         description,
         phone: Number(phone),
@@ -62,21 +56,21 @@ exports.addRestaurant = (0, trycatch_1.default)(async (req, res) => {
         restaurant,
     });
 });
-exports.fetchMyRestaurant = (0, trycatch_1.default)(async (req, res) => {
+export const fetchMyRestaurant = TryCatch(async (req, res) => {
     const user = req.user;
     if (!user) {
         return res.status(401).json({
             message: "Unauthorized"
         });
     }
-    const restaurant = await Restaurant_1.default.findOne({ ownerId: user._id });
+    const restaurant = await Restaurant.findOne({ ownerId: user._id });
     if (!restaurant) {
         return res.status(404).json({
             message: "Restaurant not found"
         });
     }
     if (!user.restaurantId) {
-        const token = jsonwebtoken_1.default.sign({
+        const token = jwt.sign({
             user: {
                 ...req.user,
                 restaurantId: restaurant._id,
@@ -91,7 +85,7 @@ exports.fetchMyRestaurant = (0, trycatch_1.default)(async (req, res) => {
         restaurant
     });
 });
-exports.updateStatusRestaurant = (0, trycatch_1.default)(async (req, res) => {
+export const updateStatusRestaurant = TryCatch(async (req, res) => {
     if (!req.user) {
         return res.status(403).json({
             message: "Please Login"
@@ -103,7 +97,7 @@ exports.updateStatusRestaurant = (0, trycatch_1.default)(async (req, res) => {
             message: "Status must be a boolean value",
         });
     }
-    const restaurant = await Restaurant_1.default.findOneAndUpdate({ ownerId: req.user._id }, { isOpen: status }, { new: true });
+    const restaurant = await Restaurant.findOneAndUpdate({ ownerId: req.user._id }, { isOpen: status }, { new: true });
     if (!restaurant) {
         return res.status(404).json({
             message: "Restaurant not found",
@@ -114,14 +108,14 @@ exports.updateStatusRestaurant = (0, trycatch_1.default)(async (req, res) => {
         restaurant,
     });
 });
-exports.updateRestaurant = (0, trycatch_1.default)(async (req, res) => {
+export const updateRestaurant = TryCatch(async (req, res) => {
     if (!req.user) {
         return res.status(403).json({
             message: "Please Login"
         });
     }
     const { name, description } = req.body;
-    const restaurant = await Restaurant_1.default.findOneAndUpdate({ ownerId: req.user._id }, { name, description }, { new: true });
+    const restaurant = await Restaurant.findOneAndUpdate({ ownerId: req.user._id }, { name, description }, { new: true });
     if (!restaurant) {
         return res.status(404).json({
             message: "Restaurant not found",
@@ -132,7 +126,7 @@ exports.updateRestaurant = (0, trycatch_1.default)(async (req, res) => {
         restaurant,
     });
 });
-exports.getNearbyRestaurant = (0, trycatch_1.default)(async (req, res) => {
+export const getNearbyRestaurant = TryCatch(async (req, res) => {
     const { latitude, longitude, radius = 5000, search = "" } = req.query;
     if (!latitude || !longitude) {
         return res.status(400).json({
@@ -145,7 +139,7 @@ exports.getNearbyRestaurant = (0, trycatch_1.default)(async (req, res) => {
     if (search && typeof search === "string") {
         query.name = { $regex: search, $options: "i" };
     }
-    const restaurants = await Restaurant_1.default.aggregate([
+    const restaurants = await Restaurant.aggregate([
         {
             $geoNear: {
                 key: "autoLocation",
@@ -178,8 +172,8 @@ exports.getNearbyRestaurant = (0, trycatch_1.default)(async (req, res) => {
         restaurants,
     });
 });
-exports.fetchSingleRestaurant = (0, trycatch_1.default)(async (req, res) => {
-    const restaurant = await Restaurant_1.default.findById(req.params.id);
+export const fetchSingleRestaurant = TryCatch(async (req, res) => {
+    const restaurant = await Restaurant.findById(req.params.id);
     res.json({
         restaurant
     });

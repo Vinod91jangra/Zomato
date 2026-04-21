@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useAppData } from "../context/Appcontext";
 import toast from "react-hot-toast";
 import { BiLogOut, BiMapPin, BiPackage } from "react-icons/bi";
+import Orders from "./Orders";
 
 
 const Account = () => {
@@ -34,9 +35,9 @@ const Account = () => {
               </div>
               <div className="divide-y">
                 <div className="flex cursor-pointer items-center gap-4 p-5 hover:bg-gray-50" 
-                onClick={() => Navigate("/orders")}>
+                onClick={() => Navigate("/order")}>
               <BiPackage className="h-5 w-5 text-red-500"/>
-                <span className="font-medium">My Orders</span>
+                <span className="font-medium">Orders</span>
                 
                 </div>
 

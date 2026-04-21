@@ -1,21 +1,15 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.toggleMenuItemAvailablity = exports.deleteMenuItem = exports.getAllItems = exports.addMenuItem = void 0;
-const axios_1 = __importDefault(require("axios"));
-const datauri_1 = __importDefault(require("../config/datauri"));
-const trycatch_1 = __importDefault(require("../middlewares/trycatch"));
-const Restaurant_1 = __importDefault(require("../model/Restaurant"));
-const MenuItems_1 = __importDefault(require("../model/MenuItems"));
-exports.addMenuItem = (0, trycatch_1.default)(async (req, res) => {
+import axios from "axios";
+import getBuffer from "../config/datauri";
+import TryCatch from "../middlewares/trycatch";
+import Restaurant from "../model/Restaurant";
+import MenuItems from "../model/MenuItems";
+export const addMenuItem = TryCatch(async (req, res) => {
     if (!req.user) {
         return res.status(401).json({
             message: "Please Login"
         });
     }
-    const restaurant = await Restaurant_1.default.findOne({
+    const restaurant = await Restaurant.findOne({
         ownerId: req.user?._id
     });
     if (!restaurant) {
@@ -35,16 +29,16 @@ exports.addMenuItem = (0, trycatch_1.default)(async (req, res) => {
             message: "Please give Image"
         });
     }
-    const fileBuffer = (0, datauri_1.default)(file);
+    const fileBuffer = getBuffer(file);
     if (!fileBuffer?.content) {
         return res.status(400).json({
             message: "Failed to create file buffer"
         });
     }
-    const { data: uploadResult } = await axios_1.default.post(`${process.env.UTILS_SERVICE}/api/upload`, {
+    const { data: uploadResult } = await axios.post(`${process.env.UTILS_SERVICE}/api/upload`, {
         buffer: fileBuffer.content,
     });
-    const item = await MenuItems_1.default.create({
+    const item = await MenuItems.create({
         name,
         description,
         price,
@@ -56,19 +50,19 @@ exports.addMenuItem = (0, trycatch_1.default)(async (req, res) => {
         item
     });
 });
-exports.getAllItems = (0, trycatch_1.default)(async (req, res) => {
+export const getAllItems = TryCatch(async (req, res) => {
     const { id } = req.params;
     if (!id) {
         return res.status(400).json({
             message: "Id is required"
         });
     }
-    const items = await MenuItems_1.default.find({ restaurantId: id });
+    const items = await MenuItems.find({ restaurantId: id });
     res.json({
         items
     });
 });
-exports.deleteMenuItem = (0, trycatch_1.default)(async (req, res) => {
+export const deleteMenuItem = TryCatch(async (req, res) => {
     if (!req.user) {
         return res.status(401).json({
             message: "Please Login"
@@ -80,13 +74,13 @@ exports.deleteMenuItem = (0, trycatch_1.default)(async (req, res) => {
             message: "Id is required"
         });
     }
-    const Item = await MenuItems_1.default.findById(itemId);
+    const Item = await MenuItems.findById(itemId);
     if (!Item) {
         return res.status(404).json({
             message: "no item found"
         });
     }
-    const restaurant = await Restaurant_1.default.findOne({
+    const restaurant = await Restaurant.findOne({
         _id: Item.restaurantId,
         ownerId: req.user._id,
     });
@@ -100,7 +94,7 @@ exports.deleteMenuItem = (0, trycatch_1.default)(async (req, res) => {
         message: "Menu item Deleted Successfully"
     });
 });
-exports.toggleMenuItemAvailablity = (0, trycatch_1.default)(async (req, res) => {
+export const toggleMenuItemAvailablity = TryCatch(async (req, res) => {
     if (!req.user) {
         return res.status(401).json({
             message: "Please Login"
@@ -112,13 +106,13 @@ exports.toggleMenuItemAvailablity = (0, trycatch_1.default)(async (req, res) => 
             message: "Id is required"
         });
     }
-    const Item = await MenuItems_1.default.findById(itemId);
+    const Item = await MenuItems.findById(itemId);
     if (!Item) {
         return res.status(404).json({
             message: "no item found"
         });
     }
-    const restaurant = await Restaurant_1.default.findOne({
+    const restaurant = await Restaurant.findOne({
         _id: Item.restaurantId,
         ownerId: req.user._id,
     });

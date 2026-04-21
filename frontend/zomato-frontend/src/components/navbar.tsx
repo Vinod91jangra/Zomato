@@ -1,5 +1,5 @@
 import { use, useEffect, useState } from "react";
-import { useAppData } from "../context/Appcontext"
+import { useAppData, } from "../context/Appcontext"
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { CgShoppingCart } from "react-icons/cg";
 import { BiMapPin, BiSearch } from "react-icons/bi";
@@ -7,7 +7,7 @@ import { BiMapPin, BiSearch } from "react-icons/bi";
 
 
 const Navbar = () => {
-    const {isAuth,city} = useAppData();
+    const {isAuth,city,quantity} = useAppData();
     const currentLocation = useLocation();
 
     const isHomePage = currentLocation.pathname === "/";
@@ -39,7 +39,7 @@ const Navbar = () => {
             <CgShoppingCart className="h-6 w-6 text-[#E23744]" />
             <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center
             rounded-full bg-[#E23744] text-white text-xs font-semibold">    
-                0
+                {quantity}
             </span>
             </Link>
             {

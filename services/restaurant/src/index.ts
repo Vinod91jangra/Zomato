@@ -4,10 +4,22 @@ import dotenv from "dotenv";
 import restaurantRoutes from "./routes/restaurant.js";
 import cors from "cors";
 import itemRoutes from "./routes/menuItem.js";
-import fetch from "node-fetch"; // ✅ important if Node < 18
-
+import fetch from "node-fetch"; // 
+import cartRoutes from "./routes/CartItem.js"; 
+import addressRoute from "./routes/Address.js"
+import orderRoutes from "./routes/Order.js"
+import { connectRabbitMQ } from "./config/rabbitmq.js";
+import { startPaymentConsumer } from "./config/payment.consumer.js";
 dotenv.config();
 
+const startServer = async () => {
+  await connectRabbitMQ();
+  startPaymentConsumer();
+
+  // start express server here also
+};
+
+startServer();
 const app = express();
 
 app.use(cors());
@@ -18,6 +30,9 @@ const PORT = process.env.PORT || 5001;
 // ✅ Routes
 app.use("/api/restaurant", restaurantRoutes);
 app.use("/api/item", itemRoutes);
+app.use("/api/cart", cartRoutes); 
+app.use("/api/address",addressRoute);
+app.use("/api/order",orderRoutes);
 
 // ✅ Simple in-memory cache
 const cache = {};
